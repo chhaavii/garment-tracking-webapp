@@ -2,9 +2,32 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
-import { Scan, ClipboardList, TriangleAlert as AlertTriangle, Shirt as ShirtIcon, Activity, Settings, Bell, Clock } from 'lucide-react-native';
+import { Scan, ClipboardList, TriangleAlert as AlertTriangle, Shirt as ShirtIcon, Activity, Settings, Bell, Clock, Moon, Sun } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
 
 export default function HomeScreen() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    // Check system preference for dark mode
+    const checkDarkMode = () => {
+      // For web, we can check prefers-color-scheme
+      if (typeof window !== 'undefined') {
+        const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        setIsDarkMode(darkModeQuery.matches);
+        
+        const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+        darkModeQuery.addEventListener('change', handleChange);
+        return () => darkModeQuery.removeEventListener('change', handleChange);
+      }
+    };
+    
+    checkDarkMode();
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
   const currentTime = new Date().toLocaleString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -72,66 +95,72 @@ export default function HomeScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor="#0ea5e9" />
+    <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
+      <StatusBar style="light" backgroundColor={isDarkMode ? "#1e293b" : "#0ea5e9"} />
       
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, isDarkMode && styles.headerDark]}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.hospitalName}>St. Mary's Hospital</Text>
-            <Text style={styles.dateTime}>{currentTime}</Text>
+            <Text style={[styles.hospitalName, isDarkMode && styles.hospitalNameDark]}>St. Mary's Hospital</Text>
+            <Text style={[styles.dateTime, isDarkMode && styles.dateTimeDark]}>{currentTime}</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Bell size={24} color="#ffffff" />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>3</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Bell size={24} color="#ffffff" />
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationText}>3</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.darkModeButton} onPress={toggleDarkMode}>
+              {isDarkMode ? <Sun size={20} color="#ffffff" /> : <Moon size={20} color="#ffffff" />}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.scrollView, isDarkMode && styles.scrollViewDark]} showsVerticalScrollIndicator={false}>
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Welcome back, Dr. Smith</Text>
-          <Text style={styles.welcomeSubtitle}>Ready to provide exceptional care</Text>
+          <Text style={[styles.welcomeTitle, isDarkMode && styles.welcomeTitleDark]}>Welcome back, Dr. Smith</Text>
+          <Text style={[styles.welcomeSubtitle, isDarkMode && styles.welcomeSubtitleDark]}>Ready to provide exceptional care</Text>
         </View>
 
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>23</Text>
-            <Text style={styles.statLabel}>Active Patients</Text>
+          <View style={[styles.statCard, isDarkMode && styles.statCardDark]}>
+            <Text style={[styles.statNumber, isDarkMode && styles.statNumberDark]}>23</Text>
+            <Text style={[styles.statLabel, isDarkMode && styles.statLabelDark]}>Active Patients</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>8</Text>
-            <Text style={styles.statLabel}>Pending Logs</Text>
+          <View style={[styles.statCard, isDarkMode && styles.statCardDark]}>
+            <Text style={[styles.statNumber, isDarkMode && styles.statNumberDark]}>8</Text>
+            <Text style={[styles.statLabel, isDarkMode && styles.statLabelDark]}>Pending Logs</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>12</Text>
-            <Text style={styles.statLabel}>Clean Garments</Text>
+          <View style={[styles.statCard, isDarkMode && styles.statCardDark]}>
+            <Text style={[styles.statNumber, isDarkMode && styles.statNumberDark]}>12</Text>
+            <Text style={[styles.statLabel, isDarkMode && styles.statLabelDark]}>Clean Garments</Text>
           </View>
         </View>
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={[styles.sectionTitle, isDarkMode && styles.sectionTitleDark]}>Quick Actions</Text>
           <View style={styles.actionGrid}>
             {quickActions.map((action, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
                   styles.actionCard,
-                  action.urgent && styles.urgentCard
+                  isDarkMode && styles.actionCardDark,
+                  action.urgent && (isDarkMode ? styles.urgentCardDark : styles.urgentCard)
                 ]}
                 onPress={() => router.push(action.route as any)}
               >
                 <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
                   <action.icon size={24} color="#ffffff" />
                 </View>
-                <Text style={styles.actionTitle}>{action.title}</Text>
-                <Text style={styles.actionSubtitle}>{action.subtitle}</Text>
+                <Text style={[styles.actionTitle, isDarkMode && styles.actionTitleDark]}>{action.title}</Text>
+                <Text style={[styles.actionSubtitle, isDarkMode && styles.actionSubtitleDark]}>{action.subtitle}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -139,17 +168,17 @@ export default function HomeScreen() {
 
         {/* Recent Activity */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <View style={styles.activityContainer}>
+          <Text style={[styles.sectionTitle, isDarkMode && styles.sectionTitleDark]}>Recent Activity</Text>
+          <View style={[styles.activityContainer, isDarkMode && styles.activityContainerDark]}>
             {recentActivity.map((item, index) => (
-              <View key={index} style={styles.activityItem}>
-                <View style={styles.activityIcon}>
-                  <Clock size={16} color="#6b7280" />
+              <View key={index} style={[styles.activityItem, isDarkMode && styles.activityItemDark]}>
+                <View style={[styles.activityIcon, isDarkMode && styles.activityIconDark]}>
+                  <Clock size={16} color={isDarkMode ? "#9ca3af" : "#6b7280"} />
                 </View>
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityPatient}>{item.patient}</Text>
-                  <Text style={styles.activityAction}>{item.action}</Text>
-                  <Text style={styles.activityMeta}>{item.ward} • {item.time}</Text>
+                  <Text style={[styles.activityPatient, isDarkMode && styles.activityPatientDark]}>{item.patient}</Text>
+                  <Text style={[styles.activityAction, isDarkMode && styles.activityActionDark]}>{item.action}</Text>
+                  <Text style={[styles.activityMeta, isDarkMode && styles.activityMetaDark]}>{item.ward} • {item.time}</Text>
                 </View>
               </View>
             ))}
@@ -165,26 +194,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
+  containerDark: {
+    backgroundColor: '#0f172a',
+  },
   header: {
     backgroundColor: '#0ea5e9',
     paddingHorizontal: 20,
     paddingVertical: 16,
+  },
+  headerDark: {
+    backgroundColor: '#1e293b',
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   hospitalName: {
     fontSize: 20,
     fontFamily: 'Inter-Bold',
     color: '#ffffff',
+  },
+  hospitalNameDark: {
+    color: '#f1f5f9',
   },
   dateTime: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: '#e0f2fe',
     marginTop: 2,
+  },
+  dateTimeDark: {
+    color: '#cbd5e1',
   },
   notificationButton: {
     position: 'relative',
@@ -206,8 +252,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#ffffff',
   },
+  darkModeButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
   scrollView: {
     flex: 1,
+  },
+  scrollViewDark: {
+    backgroundColor: '#0f172a',
   },
   welcomeSection: {
     padding: 20,
@@ -219,10 +273,16 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginBottom: 4,
   },
+  welcomeTitleDark: {
+    color: '#f1f5f9',
+  },
   welcomeSubtitle: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     color: '#64748b',
+  },
+  welcomeSubtitleDark: {
+    color: '#94a3b8',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -242,17 +302,28 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  statCardDark: {
+    backgroundColor: '#1e293b',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+  },
   statNumber: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
     color: '#0ea5e9',
     marginBottom: 4,
   },
+  statNumberDark: {
+    color: '#38bdf8',
+  },
   statLabel: {
     fontSize: 12,
     fontFamily: 'Inter-Medium',
     color: '#6b7280',
     textAlign: 'center',
+  },
+  statLabelDark: {
+    color: '#94a3b8',
   },
   section: {
     paddingHorizontal: 20,
@@ -263,6 +334,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#1e293b',
     marginBottom: 16,
+  },
+  sectionTitleDark: {
+    color: '#f1f5f9',
   },
   actionGrid: {
     flexDirection: 'row',
@@ -281,10 +355,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  actionCardDark: {
+    backgroundColor: '#1e293b',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+  },
   urgentCard: {
     borderWidth: 2,
     borderColor: '#fecaca',
     backgroundColor: '#fef2f2',
+  },
+  urgentCardDark: {
+    borderColor: '#7f1d1d',
+    backgroundColor: '#450a0a',
   },
   actionIcon: {
     width: 48,
@@ -301,11 +384,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 4,
   },
+  actionTitleDark: {
+    color: '#f1f5f9',
+  },
   actionSubtitle: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: '#6b7280',
     textAlign: 'center',
+  },
+  actionSubtitleDark: {
+    color: '#94a3b8',
   },
   activityContainer: {
     backgroundColor: '#ffffff',
@@ -317,12 +406,20 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  activityContainerDark: {
+    backgroundColor: '#1e293b',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+  },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
+  },
+  activityItemDark: {
+    borderBottomColor: '#334155',
   },
   activityIcon: {
     width: 32,
@@ -333,6 +430,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
+  activityIconDark: {
+    backgroundColor: '#334155',
+  },
   activityContent: {
     flex: 1,
   },
@@ -342,15 +442,24 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginBottom: 2,
   },
+  activityPatientDark: {
+    color: '#f1f5f9',
+  },
   activityAction: {
     fontSize: 13,
     fontFamily: 'Inter-Regular',
     color: '#4b5563',
     marginBottom: 2,
   },
+  activityActionDark: {
+    color: '#cbd5e1',
+  },
   activityMeta: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     color: '#9ca3af',
+  },
+  activityMetaDark: {
+    color: '#64748b',
   },
 });
