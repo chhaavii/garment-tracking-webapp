@@ -1,4 +1,4 @@
-#MediTrack -Healthcare Garment Tracking System
+# MediTrack -Healthcare Garment Tracking System
 
 A comprehensive healthcare garment tracking and patient management system designed for hospitals and healthcare facilities. Combines IoT technology (NFC tags) with mobile/web interfaces to streamline critical healthcare operations.
 
